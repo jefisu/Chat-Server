@@ -36,7 +36,7 @@ class ChatController(
     ) {
         val message = Message(
             text = text,
-            username = ownerUser.username,
+            userId = ownerUser.id,
             timestamp = System.currentTimeMillis()
         )
         chatDataSource.insertMessage(chat, message)

@@ -24,11 +24,11 @@ fun Application.configureSecurity(
 
     intercept(ApplicationCallPipeline.Plugins) {
         if (call.sessions.get<ChatSession>() == null) {
-            val senderUsername = call.parameters["sender"] ?: return@intercept
-            val recipientUsername = call.parameters["recipient"] ?: return@intercept
+            val senderId = call.parameters["senderId"] ?: return@intercept
+            val recipientId = call.parameters["recipientId"] ?: return@intercept
 
-            val sender = userDataSource.getUserByLogin(senderUsername)
-            val recipient = userDataSource.getUserByLogin(recipientUsername)
+            val sender = userDataSource.getUserById(senderId)
+            val recipient = userDataSource.getUserById(recipientId)
 
             val chat = chatDataSource.startNewChat(
                 sender?.toUserDto() ?: return@intercept,

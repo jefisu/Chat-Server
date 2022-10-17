@@ -13,6 +13,10 @@ class MongoUserDataSource(
 
     private val users = db.getCollection<User>()
 
+    override suspend fun getUserById(id: String): User? {
+        return users.findOneById(id)
+    }
+
     override suspend fun getUserByLogin(login: String): User? {
         val user = users.findOne(User::username eq login)
         user?.let { return it }

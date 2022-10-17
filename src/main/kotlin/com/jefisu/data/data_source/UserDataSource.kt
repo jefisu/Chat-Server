@@ -5,6 +5,8 @@ import com.jefisu.data.model.response.UserDto
 
 interface UserDataSource {
 
+    suspend fun getUserById(id: String): User?
+
     suspend fun getUserByLogin(login: String): User?
 
     suspend fun insertUser(user: User): Boolean
