@@ -15,8 +15,7 @@ import io.ktor.server.sessions.*
 
 fun Application.configureSecurity(
     config: TokenConfig,
-    chatDataSource: ChatDataSource,
-    userDataSource: UserDataSource
+    chatDataSource: ChatDataSource
 ) {
     install(Sessions) {
         cookie<ChatSession>("SESSION")
@@ -27,14 +26,8 @@ fun Application.configureSecurity(
             val senderId = call.parameters["senderId"] ?: return@intercept
             val recipientId = call.parameters["recipientId"] ?: return@intercept
 
-            val sender = userDataSource.getUserById(senderId)
-            val recipient = userDataSource.getUserById(recipientId)
-
-            val chat = chatDataSource.startNewChat(
-                sender?.toUserDto() ?: return@intercept,
-                recipient?.toUserDto() ?: return@intercept
-            )
-            call.sessions.set(ChatSession(sender, recipient, chat))
+            val chat = chatDataSource.startNewChat(senderId, recipientId)
+            call.sessions.set(ChatSession(senderId, recipientId, chat))
         }
     }
 

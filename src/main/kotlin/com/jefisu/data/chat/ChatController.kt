@@ -3,7 +3,6 @@ package com.jefisu.data.chat
 import com.jefisu.data.data_source.ChatDataSource
 import com.jefisu.data.model.Chat
 import com.jefisu.data.model.Message
-import com.jefisu.data.model.User
 import com.jefisu.session.Member
 import io.ktor.util.collections.*
 import io.ktor.websocket.*
@@ -16,14 +15,14 @@ class ChatController(
     private val members = ConcurrentMap<String, Member>()
 
     fun joinChat(
-        ownerUsername: String,
+        userId: String,
         chatId: String,
         socket: WebSocketSession
     ): Boolean {
         val currentSocketWithUsers = members.values.count { it.socket == socket }
-        val userHasExistChat = members.any { it.key == ownerUsername }
+        val userHasExistChat = members.any { it.key == userId }
         if (currentSocketWithUsers <= 1 || userHasExistChat) {
-            members[ownerUsername] = Member(chatId, socket)
+            members[userId] = Member(chatId, socket)
             return true
         }
         return false
@@ -31,12 +30,12 @@ class ChatController(
 
     suspend fun sendMessage(
         chat: Chat,
-        ownerUser: User,
+        userId: String,
         text: String
     ) {
         val message = Message(
             text = text,
-            userId = ownerUser.id,
+            userId = userId,
             timestamp = System.currentTimeMillis()
         )
         chatDataSource.insertMessage(chat, message)
@@ -47,10 +46,10 @@ class ChatController(
             .forEach { it.socket.send(parsedMessage) }
     }
 
-    suspend fun exitChat(username: String) {
+    suspend fun exitChat(userId: String) {
         members.apply {
-            get(username)?.socket?.close()
-            remove(username)
+            get(userId)?.socket?.close()
+            remove(userId)
         }
     }
 }

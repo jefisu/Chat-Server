@@ -4,7 +4,7 @@ import com.jefisu.data.model.Chat
 import com.jefisu.data.model.User
 
 data class ChatSession(
-    val ownerUser: User,
-    val recipientUser: User,
+    val ownerId: String,
+    val recipientId: String,
     val chat: Chat
 )

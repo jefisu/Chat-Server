@@ -29,6 +29,6 @@ fun Application.module() {
     configureSockets()
     configureSerialization()
     configureMonitoring()
-    configureSecurity(config, chatDataSource, userDataSource)
+    configureSecurity(config, chatDataSource)
     configureRouting(config, userDataSource, chatDataSource)
 }

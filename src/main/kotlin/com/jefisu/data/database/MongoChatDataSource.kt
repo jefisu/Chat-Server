@@ -13,14 +13,14 @@ class MongoChatDataSource(
 
     private val chats = db.getCollection<Chat>()
 
-    override suspend fun startNewChat(sender: UserDto, recipient: UserDto): Chat {
-        val existChat = chats.findOne(Chat::users.contains(sender), Chat::users.contains(recipient))
+    override suspend fun startNewChat(senderId: String, recipientId: String): Chat {
+        val existChat = chats.findOne(Chat::userIds.contains(senderId), Chat::userIds.contains(recipientId))
         if (existChat != null) {
             return existChat
         }
 
         val chat = Chat(
-            users = listOf(sender, recipient),
+            userIds = listOf(senderId, recipientId),
             messages = emptyList(),
             createdAt = System.currentTimeMillis()
         )
@@ -42,8 +42,8 @@ class MongoChatDataSource(
         return chats.findOneById(chatId)
     }
 
-    override suspend fun getChatsByUser(user: UserDto): List<Chat> {
-        return chats.find(Chat::users.contains(user))
+    override suspend fun getChatsByUser(userId: String): List<Chat> {
+        return chats.find(Chat::userIds.contains(userId))
             .descendingSort()
             .toList()
     }

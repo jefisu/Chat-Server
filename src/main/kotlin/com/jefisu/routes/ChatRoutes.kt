@@ -24,14 +24,14 @@ fun Route.chatSocket(
             return@webSocket
         }
         val joinChat = chatController.joinChat(
-            session.ownerUser.username,
+            session.ownerId,
             session.chat.id,
             this
         )
         if (!joinChat) {
             webSocketRaw {
                 chatController.joinChat(
-                    session.ownerUser.username,
+                    session.ownerId,
                     session.chat.id,
                     this
                 )
@@ -42,7 +42,7 @@ fun Route.chatSocket(
                 if (frame is Frame.Text) {
                     chatController.sendMessage(
                         chat = session.chat,
-                        ownerUser = session.ownerUser,
+                        userId = session.ownerId,
                         text = frame.readText()
                     )
                 }
@@ -50,21 +50,21 @@ fun Route.chatSocket(
         } catch (e: ClosedReceiveChannelException) {
             e.printStackTrace()
         } finally {
-            chatController.exitChat(session.ownerUser.username)
+            chatController.exitChat(session.ownerId)
         }
     }
 }
 
 fun Route.chatsByUser(chatDataSource: ChatDataSource) {
     post("chats") {
-        val user = call.receiveNullable<UserDto>() ?: kotlin.run {
+        val userId = call.parameters["userId"] ?: kotlin.run {
             call.respond(
                 status = HttpStatusCode.Conflict,
                 message = "User not registered"
             )
             return@post
         }
-        val chats = chatDataSource.getChatsByUser(user)
+        val chats = chatDataSource.getChatsByUser(userId)
         call.respond(
             message = chats,
             status = HttpStatusCode.OK
