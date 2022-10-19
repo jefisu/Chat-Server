@@ -37,5 +37,6 @@ fun Application.configureRouting(
         changeAvatar(userDataSource)
         chatsByUser(chatDataSource)
         getAllUsers(userDataSource)
+        deleteChat(chatDataSource)
     }
 }

@@ -3,7 +3,6 @@ package com.jefisu.data.database
 import com.jefisu.data.data_source.ChatDataSource
 import com.jefisu.data.model.Chat
 import com.jefisu.data.model.Message
-import com.jefisu.data.model.response.UserDto
 import org.litote.kmongo.contains
 import org.litote.kmongo.coroutine.CoroutineDatabase
 
@@ -48,7 +47,7 @@ class MongoChatDataSource(
             .toList()
     }
 
-    override suspend fun deleteChat(chatId: String) {
-        chats.deleteOneById(chatId)
+    override suspend fun deleteChat(chatId: String): Boolean {
+        return chats.deleteOneById(chatId).wasAcknowledged()
     }
 }

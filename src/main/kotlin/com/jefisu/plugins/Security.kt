@@ -2,8 +2,6 @@ package com.jefisu.plugins
 
 import com.auth0.jwt.algorithms.Algorithm
 import com.jefisu.data.data_source.ChatDataSource
-import com.jefisu.data.data_source.UserDataSource
-import com.jefisu.data.mapper.toUserDto
 import com.jefisu.security.token.TokenConfig
 import com.jefisu.session.ChatSession
 import io.ktor.http.*
