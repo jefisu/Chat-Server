@@ -2,9 +2,12 @@ package com.jefisu.data.database
 
 import com.jefisu.data.data_source.ChatDataSource
 import com.jefisu.data.model.Chat
+import com.jefisu.data.model.DeleteResource
 import com.jefisu.data.model.Message
 import org.litote.kmongo.contains
 import org.litote.kmongo.coroutine.CoroutineDatabase
+import org.litote.kmongo.eq
+import org.litote.kmongo.`in`
 
 class MongoChatDataSource(
     db: CoroutineDatabase
@@ -47,15 +50,20 @@ class MongoChatDataSource(
             .toList()
     }
 
-    override suspend fun deleteChat(chatId: String): Boolean {
-        return chats.deleteOneById(chatId).wasAcknowledged()
+    override suspend fun deleteChat(deleteResource: DeleteResource): Boolean {
+        deleteResource.items.forEach { chatId ->
+            chats.findOneAndDelete(
+                filter = Chat::id eq chatId
+            )
+        }
+        return true
     }
 
-    override suspend fun deleteMessage(messageIds: List<String>, chatId: String): Boolean {
-        val chat = getChatById(chatId) ?: return false
+    override suspend fun deleteMessage(deleteResource: DeleteResource): Boolean {
+        val chat = getChatById(deleteResource.id) ?: return false
         return chats.updateOneById(
-            id = chatId,
-            update = chat.copy(messages = chat.messages.filter { !messageIds.contains(it.id) })
+            id = chat.id,
+            update = chat.copy(messages = chat.messages.filter { !deleteResource.items.contains(it.id) })
         ).wasAcknowledged()
     }
 

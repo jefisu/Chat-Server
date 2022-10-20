@@ -2,8 +2,7 @@ package com.jefisu.routes
 
 import com.jefisu.data.chat.ChatController
 import com.jefisu.data.data_source.ChatDataSource
-import com.jefisu.data.model.Message
-import com.jefisu.data.model.MessageId
+import com.jefisu.data.model.DeleteResource
 import com.jefisu.session.ChatSession
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -98,14 +97,11 @@ fun Route.getChat(chatDataSource: ChatDataSource) {
 
 fun Route.deleteChat(chatDataSource: ChatDataSource) {
     delete("chat/bin") {
-        val chatId = call.parameters["chatId"] ?: kotlin.run {
-            call.respond(
-                message = "Chat ID is invalid.",
-                status = HttpStatusCode.Conflict
-            )
+        val request = call.receiveNullable<DeleteResource>() ?: kotlin.run {
+            call.respond(HttpStatusCode.Conflict)
             return@delete
         }
-        val wasAcknowledged = chatDataSource.deleteChat(chatId)
+        val wasAcknowledged = chatDataSource.deleteChat(request)
         if (!wasAcknowledged) {
             call.respond(
                 message = "Couldn't delete chat",
@@ -122,21 +118,11 @@ fun Route.deleteChat(chatDataSource: ChatDataSource) {
 
 fun Route.deleteMessage(chatDataSource: ChatDataSource) {
     delete("chat/message") {
-        val chatId = call.parameters["chatId"] ?: kotlin.run {
-            call.respond(
-                message = "Chat ID is invalid.",
-                status = HttpStatusCode.Conflict
-            )
+        val request = call.receiveNullable<DeleteResource>() ?: kotlin.run {
+            call.respond(HttpStatusCode.Conflict)
             return@delete
         }
-        val messageIds = call.receiveNullable<List<MessageId>>() ?: kotlin.run {
-            call.respond(
-                message = "IDs is invalid.",
-                status = HttpStatusCode.Conflict
-            )
-            return@delete
-        }
-        val wasAcknowledged = chatDataSource.deleteMessage(messageIds.map { it.id }, chatId)
+        val wasAcknowledged = chatDataSource.deleteMessage(request)
         if (!wasAcknowledged) {
             call.respond(
                 message = "Couldn't delete message",
