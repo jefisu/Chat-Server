@@ -9,4 +9,6 @@ interface ChatDataSource {
     suspend fun getChatById(chatId: String): Chat?
     suspend fun getChatsByUser(userId: String): List<Chat>
     suspend fun deleteChat(chatId: String): Boolean
+    suspend fun deleteMessage(messageIds: List<String>, chatId: String): Boolean
+    suspend fun clearChat(chatId: String): Boolean
 }

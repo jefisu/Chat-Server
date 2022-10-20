@@ -2,9 +2,12 @@ package com.jefisu.routes
 
 import com.jefisu.data.chat.ChatController
 import com.jefisu.data.data_source.ChatDataSource
+import com.jefisu.data.model.Message
+import com.jefisu.data.model.MessageId
 import com.jefisu.session.ChatSession
 import io.ktor.http.*
 import io.ktor.server.application.*
+import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 import io.ktor.server.sessions.*
@@ -94,7 +97,7 @@ fun Route.getChat(chatDataSource: ChatDataSource) {
 }
 
 fun Route.deleteChat(chatDataSource: ChatDataSource) {
-    delete ("chat/bin") {
+    delete("chat/bin") {
         val chatId = call.parameters["chatId"] ?: kotlin.run {
             call.respond(
                 message = "Chat ID is invalid.",
@@ -112,6 +115,61 @@ fun Route.deleteChat(chatDataSource: ChatDataSource) {
         }
         call.respond(
             message = "Chat successfully deleted",
+            status = HttpStatusCode.OK
+        )
+    }
+}
+
+fun Route.deleteMessage(chatDataSource: ChatDataSource) {
+    delete("chat/message") {
+        val chatId = call.parameters["chatId"] ?: kotlin.run {
+            call.respond(
+                message = "Chat ID is invalid.",
+                status = HttpStatusCode.Conflict
+            )
+            return@delete
+        }
+        val messageIds = call.receiveNullable<List<MessageId>>() ?: kotlin.run {
+            call.respond(
+                message = "IDs is invalid.",
+                status = HttpStatusCode.Conflict
+            )
+            return@delete
+        }
+        val wasAcknowledged = chatDataSource.deleteMessage(messageIds.map { it.id }, chatId)
+        if (!wasAcknowledged) {
+            call.respond(
+                message = "Couldn't delete message",
+                status = HttpStatusCode.Conflict
+            )
+            return@delete
+        }
+        call.respond(
+            message = "Message successfully deleted",
+            status = HttpStatusCode.OK
+        )
+    }
+}
+
+fun Route.clearChat(chatDataSource: ChatDataSource) {
+    delete("chat/clear-messages") {
+        val chatId = call.parameters["chatId"] ?: kotlin.run {
+            call.respond(
+                message = "Chat ID is invalid.",
+                status = HttpStatusCode.Conflict
+            )
+            return@delete
+        }
+        val wasAcknowledged = chatDataSource.clearChat(chatId)
+        if (!wasAcknowledged) {
+            call.respond(
+                message = "Couldn't delete messages",
+                status = HttpStatusCode.Conflict
+            )
+            return@delete
+        }
+        call.respond(
+            message = "Messages successfully deleted",
             status = HttpStatusCode.OK
         )
     }

@@ -38,5 +38,7 @@ fun Application.configureRouting(
         chatsByUser(chatDataSource)
         getAllUsers(userDataSource)
         deleteChat(chatDataSource)
+        deleteMessage(chatDataSource)
+        clearChat(chatDataSource)
     }
 }

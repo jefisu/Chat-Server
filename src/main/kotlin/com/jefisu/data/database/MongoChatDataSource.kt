@@ -50,4 +50,20 @@ class MongoChatDataSource(
     override suspend fun deleteChat(chatId: String): Boolean {
         return chats.deleteOneById(chatId).wasAcknowledged()
     }
+
+    override suspend fun deleteMessage(messageIds: List<String>, chatId: String): Boolean {
+        val chat = getChatById(chatId) ?: return false
+        return chats.updateOneById(
+            id = chatId,
+            update = chat.copy(messages = chat.messages.filter { !messageIds.contains(it.id) })
+        ).wasAcknowledged()
+    }
+
+    override suspend fun clearChat(chatId: String): Boolean {
+        val chat = getChatById(chatId) ?: return false
+        return chats.updateOneById(
+            id = chatId,
+            update = chat.copy(messages = emptyList())
+        ).wasAcknowledged()
+    }
 }
